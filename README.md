@@ -1,5 +1,7 @@
 # ear-tuener
 
+Ear training tool for functional chord progression recognition.
+
 ## Project setup
 ```
 yarn install

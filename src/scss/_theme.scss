@@ -1,0 +1,17 @@
+$theme-darkest: #101010;
+$theme-darker: #303030;
+$theme-dark: #505050;
+$theme-light: #707070;
+$theme-lighter: #C0C0C0;
+$theme-lightest: #E0E0E0;
+
+body {
+    background-color: $theme-darkest;
+    color: $theme-lightest;
+    a:link {
+      color: $theme-lightest;
+    }
+    a:visited {
+      color: $theme-lighter;
+    }
+  }
