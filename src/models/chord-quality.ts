@@ -8,8 +8,7 @@ class ChordQuality {
   private readonly chromaticOffsets: ReadonlyArray<number>;
   private readonly index: number;
   private readonly name: string;
-  private readonly noteSuffix: string;
-  private readonly degreeSuffix: string;
+  private readonly suffix: string;
 
   private static readonly chordQualities: ChordQuality[] = [];
 
@@ -21,7 +20,7 @@ class ChordQuality {
   public static readonly MINOR: ChordQuality = new ChordQuality(
     [3, 4],
     "Minor",
-    "m"
+    ""
   );
   public static readonly AUGMENTED: ChordQuality = new ChordQuality(
     [4, 4],
@@ -41,7 +40,7 @@ class ChordQuality {
   public static readonly MINOR_SEVENTH: ChordQuality = new ChordQuality(
     [3, 4, 3],
     "Minor 7th",
-    "m7"
+    "7"
   );
   public static readonly DOMINANT_SEVENTH: ChordQuality = new ChordQuality(
     [4, 3, 3],
@@ -57,17 +56,12 @@ class ChordQuality {
   private constructor(
     chromaticOffsets: ReadonlyArray<number>,
     name: string,
-    noteSuffix: string
+    suffix: string
   ) {
     this.chromaticOffsets = chromaticOffsets;
     this.index = ChordQuality.chordQualities.length;
     this.name = name;
-    this.noteSuffix = noteSuffix;
-    this.degreeSuffix = noteSuffix.includes("7")
-      ? "7"
-      : chromaticOffsets.length < 3
-      ? noteSuffix
-      : "";
+    this.suffix = suffix;
     ChordQuality.chordQualities.push(this);
   }
 
@@ -106,15 +100,7 @@ class ChordQuality {
       this.chromaticOffsets[0] === MINOR_THIRD_CHROMATIC_OFFSET
         ? degree.getName().toLowerCase()
         : degree.getName();
-    return degreeName + this.degreeSuffix;
-  }
-
-  public getFullNameWithRoot(root: Pitch): string {
-    return this.name ? root.getName() + " " + this.name : root.getName();
-  }
-
-  public getNameWithRoot(root: Pitch): string {
-    return root.getName() + this.noteSuffix;
+    return degreeName + this.suffix;
   }
 }
 
