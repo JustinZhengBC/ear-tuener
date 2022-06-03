@@ -37,6 +37,9 @@ export default class PracticeGame extends Vue {
   @session.State("trueChords") trueChords!: FunctionalChord[];
   @session.Action("generateNewProgression") generateNewProgression!: () => void;
 
+  notesBeingPlayed: string[] = [];
+  nextPlayTimeoutId: number | undefined = undefined;
+  nextStopTimeoutId: number | undefined = undefined;
   toneStarted = false;
 
   mounted() {
@@ -93,16 +96,45 @@ export default class PracticeGame extends Vue {
   }
 
   playProgression(progression: ReadonlyArray<ReadonlyArray<Note>>) {
-    if (this.activeSettings) {
-      const timeBetweenNotes = this.activeSettings.speed;
-      const duration = timeBetweenNotes * 0.8;
-      progression.forEach((notes, index) => {
-        SYNTH.triggerAttackRelease(
-          notes.map((note) => note.getName()),
-          duration,
-          Tone.now() + timeBetweenNotes * index
-        );
-      });
+    if (!this.activeSettings) {
+      return;
+    }
+    if (this.notesBeingPlayed.length) {
+      SYNTH.triggerRelease(this.notesBeingPlayed, Tone.now());
+      this.notesBeingPlayed = [];
+    }
+    if (!progression.length) {
+      return;
+    }
+    this.clearFutureEvents();
+    const timeBetweenNotes = this.activeSettings.speed * 1000;
+    const duration = timeBetweenNotes * 0.8;
+    const [firstNotes, ...remainingNotes] = progression;
+    const notes = firstNotes.map((note) => note.getName());
+    SYNTH.triggerAttack(notes, Tone.now());
+    this.notesBeingPlayed = notes;
+    this.nextStopTimeoutId = setTimeout(
+      (that: PracticeGame) => that.playProgression([]),
+      duration,
+      this
+    );
+    if (remainingNotes.length) {
+      this.nextPlayTimeoutId = setTimeout(
+        (that: PracticeGame) => that.playProgression(remainingNotes),
+        timeBetweenNotes,
+        this
+      );
+    }
+  }
+
+  clearFutureEvents() {
+    if (this.nextPlayTimeoutId !== undefined) {
+      clearTimeout(this.nextPlayTimeoutId);
+      this.nextPlayTimeoutId = undefined;
+    }
+    if (this.nextStopTimeoutId !== undefined) {
+      clearTimeout(this.nextStopTimeoutId);
+      this.nextStopTimeoutId = undefined;
     }
   }
 }
